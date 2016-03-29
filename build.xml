@@ -1,0 +1,48 @@
+<project name="MyProject" default="buildwar" basedir=".">
+
+	<property name="dist.dir" location="dist" />
+
+	<!-- SETUP -->
+	<target name="setup">
+		<mkdir dir="dist" />
+		<echo>Copying web into dist</echo>
+		<copydir dest="dist/web" src="WebContent" />
+		<copydir dest="dist/web/WEB-INF/lib" src="${basedir}/WebContent/WEB-INF/lib" />
+	</target>
+
+	<!-- COMPILE -->
+	<target name="compile" depends="setup">
+		<delete dir="${dist.dir}/web/WEB-INF/classes" />
+		<mkdir dir="${dist.dir}/web/WEB-INF/classes" />
+		<javac destdir="${dist.dir}/web/WEB-INF/classes" srcdir="src/main/java">
+			<classpath>
+				<fileset dir="${basedir}/WebContent/WEB-INF/lib">
+					<include name="*" />
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="${dist.dir}/web/WEB-INF/classes">
+			<fileset dir="src">
+				<include name="**/*.properties" />
+				<include name="**/*.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- BUILD -->
+	<target name="buildwar" depends="compile">
+		<war basedir="${basedir}/dist/web" destfile="argentum.war" webxml="${basedir}/dist/web/WEB-INF/web.xml">
+			<exclude name="WEB-INF/**" />
+			<webinf dir="${basedir}/dist/web/WEB-INF/">
+				<include name="**/*.jar" />
+				<include name="**/*.class" />
+			</webinf>
+		</war>
+	</target>
+
+	<!-- DEPLOY -->
+	<target name="deploy" depends="buildwar">
+		<copy file="argentum.war" todir="${tomcat.deploydir}" />
+	</target>
+
+</project>
